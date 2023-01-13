@@ -6,7 +6,7 @@
 	    "$className": "ReplicatedStorage",
 	    "Packages": {
 		 "$path": "Packages",
-		 "synthetic": {
+		 "geometry-util": {
 		   "$path": "src"
 		 }
 	    }

@@ -107,18 +107,12 @@ export type Double = number
 
 local Earcut = require(script.Earcut)
 
---- @class Geometry
 --- A long list of geometry related functions. Consider rounding your vectors to the nearest hundredth as the smallest difference can fail an equality test.
 local Geometry = {}
 
 Geometry.__index = Geometry
 
 Geometry.phi = (1 + 5^0.5)/2
-
-
---- @prop phi number
---- @within Geometry
---- It's a constant, no need to keep resolving for it.
 
 
 --- Gets length of line.
@@ -341,21 +335,30 @@ function Geometry.getTrianglePerimeter(a: Vertex, b: Vertex, c: Vertex): number
 	return ab + bc + ca
 end
 
+
+-- Gets the area of a triangle from its side lengths
+function Geometry.getTriangleAreaFromSideLengths(ab: number, bc: number, ca: number): number
+	local perimeter: number = ab + bc + ca
+	local semiPerimeterLength: number = perimeter / 2
+
+	local deltaA: number = (semiPerimeterLength - ab)
+	local deltaB: number = (semiPerimeterLength - bc)
+	local deltaC: number = (semiPerimeterLength - ca)
+
+	return math.sqrt(semiPerimeterLength * deltaA * deltaB * deltaC)
+end
+
 --- Gets the area of a triangle from its vertices
 function Geometry.getTriangleArea(a: Vertex, b: Vertex, c: Vertex): number --heron's formula
-	local perimeter: number = Geometry.getTrianglePerimeter(a, b, c)
-	local semiPerimeterLength: number = perimeter / 2
 
 	local aLength: number = (a - b).Magnitude
 	local bLength: number = (b - c).Magnitude
 	local cLength: number = (c - a).Magnitude
 
-	local deltaA: number = (semiPerimeterLength - aLength)
-	local deltaB: number = (semiPerimeterLength - bLength)
-	local deltaC: number = (semiPerimeterLength - cLength)
-
-	return math.sqrt(semiPerimeterLength * deltaA * deltaB * deltaC)
+	return Geometry.getTriangleAreaFromSideLengths(aLength, bLength, cLength)
 end
+
+
 
 --- gets if a point parallel to the surface of the triangle exists within the perimeter. All unparallel points will return false.
 function Geometry.getIfPointIsInTriangle(point: Point, a: Vertex, b: Vertex, c: Vertex): boolean
@@ -558,7 +561,7 @@ function Geometry.getPlaneIntersection(
 		return origin, 0
 	end
 
-	local dist: number = -rpoint:Dot(planeAxis) / dot
+	local dist: number = rpoint:Dot(planeAxis) / dot
 	return origin + dist * normal, dist
 end
 
