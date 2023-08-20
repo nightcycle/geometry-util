@@ -54,12 +54,12 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Install wally packages
-      - name: update wally packages
-        run: wally-update patch        
+     #  # Install wally packages
+     #  - name: update wally packages
+     #    run: wally-update patch        
  
       - name: install wally packages
-        run: wally install   
+        run: mkdir "Packages"  
  
       - name: generate sourcemap
         run: rojo sourcemap dev.project.json --output sourcemap.json
