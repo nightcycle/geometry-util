@@ -1,8 +1,10 @@
 [package]
-name = "nightcycle/geometry-util"
-description = "A geometry util!"
-version = "1.1.1"
-authors = ["CJ Oyer <coyer@nightcycle.us>"]
+name = "nightcycle/package"
+description = "A package!"
+version = "0.1.0"
+authors = [ "CJ Oyer <coyer@nightcycle.us>",]
 realm = "shared"
 registry = "https://github.com/upliftgames/wally-index"
-exclude = ["Packages", ".vscode"]
+exclude = [ "Packages", ".vscode",]
+
+[dependencies]
