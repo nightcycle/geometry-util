@@ -108,57 +108,57 @@ export type Double = number
 local Earcut = require(script.Earcut)
 
 --- A long list of geometry related functions. Consider rounding your vectors to the nearest hundredth as the smallest difference can fail an equality test.
-local Geometry = {}
+local GeometryUtil = {}
 
-Geometry.__index = Geometry
+GeometryUtil.__index = GeometryUtil
 
-Geometry.phi = (1 + 5^0.5)/2
+GeometryUtil.phi = (1 + 5^0.5)/2
 
 
 --- Gets length of line.
-function Geometry.getLineLength(line: Line): number
+function GeometryUtil.getLineLength(line: Line): number
 	return (line[1] - line[2]).Magnitude
 end
 
 --- Performs getLineLength on a list of lines.
-function Geometry.getLineLengths(lines: { [any]: Line }): { [any]: number }
+function GeometryUtil.getLineLengths(lines: { [any]: Line }): { [any]: number }
 	local lineLengths = {}
 	for k, line in pairs(lines) do
-		lineLengths[k] = Geometry.getLineLength(line)
+		lineLengths[k] = GeometryUtil.getLineLength(line)
 	end
 	return lineLengths
 end
 
 --- Gets a point at center of line.
-function Geometry.getLineCenter(line: Line): Point
+function GeometryUtil.getLineCenter(line: Line): Point
 	return line[1]:Lerp(line[2], 0.5)
 end
 
 --- Performs getLineCenter on a list of lines.
-function Geometry.getLineCenters(lines: { [any]: Line }): { [any]: Point }
+function GeometryUtil.getLineCenters(lines: { [any]: Line }): { [any]: Point }
 	local lineCenters = {} :: { [any]: Point }
 	for k, line in pairs(lines) do
-		lineCenters[k] = Geometry.getLineCenter(line)
+		lineCenters[k] = GeometryUtil.getLineCenter(line)
 	end
 	return lineCenters
 end
 
 --- Gets the axis running parallel to the line.
-function Geometry.getLineAxis(line: Line): Axis
+function GeometryUtil.getLineAxis(line: Line): Axis
 	return (line[1] - line[2]).Unit
 end
 
 --- Performs getLineAxis on a list of lines.
-function Geometry.getLineAxes(lines: { [string]: Line }): { [string]: Axis }
+function GeometryUtil.getLineAxes(lines: { [string]: Line }): { [string]: Axis }
 	local lineAxes = {}
 	for k, line in pairs(lines) do
-		lineAxes[k] = Geometry.getLineAxis(line)
+		lineAxes[k] = GeometryUtil.getLineAxis(line)
 	end
 	return lineAxes
 end
 
 --- Finds if two verticies share a line from a list of lines.
-function Geometry.getIfVerticesConnected(a: Vertex, b: Vertex, lines: { [any]: Line }): boolean
+function GeometryUtil.getIfVerticesConnected(a: Vertex, b: Vertex, lines: { [any]: Line }): boolean
 	for k, line in pairs(lines) do
 		if (line[1] == a and line[2] == b) or (line[1] == b and line[2] == a) then
 			return true
@@ -168,7 +168,7 @@ function Geometry.getIfVerticesConnected(a: Vertex, b: Vertex, lines: { [any]: L
 end
 
 --- Filters out any lines that don't connect to the main vertex.
-function Geometry.getConnectedVertices(vertex: Vertex, lines: { [any]: Line }): { [number]: Vertex }
+function GeometryUtil.getConnectedVertices(vertex: Vertex, lines: { [any]: Line }): { [number]: Vertex }
 	local connections = {}
 	for k, line in pairs(lines) do
 		if vertex == line[1] then
@@ -181,7 +181,7 @@ function Geometry.getConnectedVertices(vertex: Vertex, lines: { [any]: Line }): 
 end
 
 --- Compiles a deduplicated list of every unique vertex in a list of lines.
-function Geometry.getAllVerticesFromLines(lines: { [string]: Line }): { [number]: Vertex }
+function GeometryUtil.getAllVerticesFromLines(lines: { [string]: Line }): { [number]: Vertex }
 	local vertices = {}
 	for k, line in pairs(lines) do
 		table.insert(vertices, line[1])
@@ -191,7 +191,7 @@ function Geometry.getAllVerticesFromLines(lines: { [string]: Line }): { [number]
 end
 
 --- Creates an indexable dictionary of the vertices each vertex is connected to.
-function Geometry.getAllVertexConnectionsFromLines(lines: { [string]: Line }): { [Vertex]: { [number]: Vertex } }
+function GeometryUtil.getAllVertexConnectionsFromLines(lines: { [string]: Line }): { [Vertex]: { [number]: Vertex } }
 	local connectedVertexRegistry: { [Vertex]: { [Vertex]: boolean } } = {}
 	for k, line in pairs(lines) do
 		connectedVertexRegistry[line[1]] = connectedVertexRegistry[line[1]] or {}
@@ -211,7 +211,7 @@ function Geometry.getAllVertexConnectionsFromLines(lines: { [string]: Line }): {
 end
 
 --- Gets if two lins share a vertex.
-function Geometry.getSharedVertex(line1: Line, line2: Line): Vertex?
+function GeometryUtil.getSharedVertex(line1: Line, line2: Line): Vertex?
 	local result: Vector3?
 	for i, a in ipairs(line1) do
 		for j, b in ipairs(line2) do
@@ -225,8 +225,8 @@ function Geometry.getSharedVertex(line1: Line, line2: Line): Vertex?
 end
 
 --- Finds if the two lines make a right angle at the vertex
-function Geometry.getIfRightAngle(vertex: Vertex, line1: Line, line2: Line): boolean
-	local connectedVertices = Geometry.getConnectedVertices(vertex, { line1, line2 })
+function GeometryUtil.getIfRightAngle(vertex: Vertex, line1: Line, line2: Line): boolean
+	local connectedVertices = GeometryUtil.getConnectedVertices(vertex, { line1, line2 })
 	local norm1: Normal = (vertex - connectedVertices[1]).Unit
 	local norm2: Normal = (vertex - connectedVertices[2]).Unit
 	local dot = norm1:Dot(norm2)
@@ -234,20 +234,20 @@ function Geometry.getIfRightAngle(vertex: Vertex, line1: Line, line2: Line): boo
 end
 
 --- Finds if a set of vertices make a right angle.
-function Geometry.getIfRightAngleFromVertices(sharedVertex: Vertex, a: Vertex, b: Vertex): boolean
+function GeometryUtil.getIfRightAngleFromVertices(sharedVertex: Vertex, a: Vertex, b: Vertex): boolean
 	local line1: Line = { sharedVertex, a }
 	local line2: Line = { sharedVertex, b }
-	return Geometry.getIfRightAngle(sharedVertex, line1, line2)
+	return GeometryUtil.getIfRightAngle(sharedVertex, line1, line2)
 end
 
 --- Gets a point at center of line.
-function Geometry.getRightAngleVertices(lines: { [string]: Line }): { [number]: Vertex }
-	local connectedVertices = Geometry.getAllVertexConnectionsFromLines(lines)
+function GeometryUtil.getRightAngleVertices(lines: { [string]: Line }): { [number]: Vertex }
+	local connectedVertices = GeometryUtil.getAllVertexConnectionsFromLines(lines)
 	local rightAngles = {}
 	for v, connections in pairs(connectedVertices) do
 		local a: Vertex = connections[1]
 		local b: Vertex = connections[2]
-		if Geometry.getIfRightAngleFromVertices(v, a, b) then
+		if GeometryUtil.getIfRightAngleFromVertices(v, a, b) then
 			table.insert(rightAngles, v)
 		end
 	end
@@ -255,12 +255,12 @@ function Geometry.getRightAngleVertices(lines: { [string]: Line }): { [number]: 
 end
 
 --- Gets the point of intersection between two lines, lerping between the closest points if none exist.
-function Geometry.getIntersectionBetweenTwoLines(line1: Line, line2: Line): Point?
-	local p1: Point? = Geometry.getClosestPointToLineOnLine(line1, line2)
+function GeometryUtil.getIntersectionBetweenTwoLines(line1: Line, line2: Line): Point?
+	local p1: Point? = GeometryUtil.getClosestPointToLineOnLine(line1, line2)
 	if not p1 then
 		return
 	end
-	local p2: Point? = Geometry.getClosestPointToLineOnLine(line2, line1)
+	local p2: Point? = GeometryUtil.getClosestPointToLineOnLine(line2, line1)
 	if not p2 then
 		return
 	end
@@ -271,16 +271,16 @@ function Geometry.getIntersectionBetweenTwoLines(line1: Line, line2: Line): Poin
 end
 
 --- When provided a quadrangular or triangular surface's lines it will return an indexable dictionary of the point on the lins opposite a vertex, rounding to the nearest vertex if an even number of vertices.
-function Geometry.getVertexOppositePointsFromLines(lines: { [any]: Line }): { [Vertex]: Point }
-	local corners: { [number]: Vertex } = Geometry.getRightAngleVertices(lines)
-	local vertices: { [number]: Vertex } = Geometry.getAllVerticesFromLines(lines)
+function GeometryUtil.getVertexOppositePointsFromLines(lines: { [any]: Line }): { [Vertex]: Point }
+	local corners: { [number]: Vertex } = GeometryUtil.getRightAngleVertices(lines)
+	local vertices: { [number]: Vertex } = GeometryUtil.getAllVerticesFromLines(lines)
 	local oppositeRegistry = {}
 	if #corners == 4 then --rectangle
 		for i, v in ipairs(corners) do
 			if oppositeRegistry[v] == nil then
 				for j, opp in ipairs(corners) do
 					if opp ~= v then
-						if Geometry.getIfVerticesConnected(v, opp, lines) == false then
+						if GeometryUtil.getIfVerticesConnected(v, opp, lines) == false then
 							oppositeRegistry[v] = opp
 							oppositeRegistry[opp] = v
 						end
@@ -309,8 +309,8 @@ function Geometry.getVertexOppositePointsFromLines(lines: { [any]: Line }): { [V
 end
 
 --- Creates a list of lines connecting opposite points on any quadrangle or triangle.
-function Geometry.getDiagonalLinesFromEdges(lines: { [any]: Line }): { [number]: Line }
-	local opposites: { [Vertex]: Point } = Geometry.getVertexOppositePointsFromLines(lines)
+function GeometryUtil.getDiagonalLinesFromEdges(lines: { [any]: Line }): { [number]: Line }
+	local opposites: { [Vertex]: Point } = GeometryUtil.getVertexOppositePointsFromLines(lines)
 
 	local diagonalRegistry: { [Vertex]: Line } = {}
 	for a, b in pairs(opposites) do
@@ -328,7 +328,7 @@ function Geometry.getDiagonalLinesFromEdges(lines: { [any]: Line }): { [number]:
 end
 
 --- Gets the perimeter of a triangle from its vertices
-function Geometry.getTrianglePerimeter(a: Vertex, b: Vertex, c: Vertex): number
+function GeometryUtil.getTrianglePerimeter(a: Vertex, b: Vertex, c: Vertex): number
 	local ab: number = (a - b).Magnitude
 	local bc: number = (b - c).Magnitude
 	local ca: number = (c - a).Magnitude
@@ -337,7 +337,7 @@ end
 
 
 -- Gets the area of a triangle from its side lengths
-function Geometry.getTriangleAreaFromSideLengths(ab: number, bc: number, ca: number): number
+function GeometryUtil.getTriangleAreaFromSideLengths(ab: number, bc: number, ca: number): number
 	local perimeter: number = ab + bc + ca
 	local semiPerimeterLength: number = perimeter / 2
 
@@ -349,65 +349,80 @@ function Geometry.getTriangleAreaFromSideLengths(ab: number, bc: number, ca: num
 end
 
 --- Gets the area of a triangle from its vertices
-function Geometry.getTriangleArea(a: Vertex, b: Vertex, c: Vertex): number --heron's formula
+function GeometryUtil.getTriangleArea(a: Vertex, b: Vertex, c: Vertex): number --heron's formula
 
 	local aLength: number = (a - b).Magnitude
 	local bLength: number = (b - c).Magnitude
 	local cLength: number = (c - a).Magnitude
 
-	return Geometry.getTriangleAreaFromSideLengths(aLength, bLength, cLength)
+	return GeometryUtil.getTriangleAreaFromSideLengths(aLength, bLength, cLength)
 end
 
 
 
 --- gets if a point parallel to the surface of the triangle exists within the perimeter. All unparallel points will return false.
-function Geometry.getIfPointIsInTriangle(point: Point, a: Vertex, b: Vertex, c: Vertex): boolean
-	local abc = Geometry.getTriangleArea(a, b, c)
-	local pbc = Geometry.getTriangleArea(point, b, c)
-	local abp = Geometry.getTriangleArea(a, b, point)
+function GeometryUtil.getIfPointIsInTriangle(point: Point, a: Vertex, b: Vertex, c: Vertex): boolean
+	local abc = GeometryUtil.getTriangleArea(a, b, c)
+	local pbc = GeometryUtil.getTriangleArea(point, b, c)
+	local abp = GeometryUtil.getTriangleArea(a, b, point)
 	return abc == pbc + abc + abp
 end
 
---- gets the angle of vertex B when provided three lines composing a triangle.
-function Geometry.getAngleThroughLawOfCos(ab: Line, bc: Line, ca: Line): Radian
-	local abLen = Geometry.getLineLength(ab)
-	local bcLen = Geometry.getLineLength(bc)
-	local caLen = Geometry.getLineLength(ca)
-	if math.round(1000 * (abLen + bcLen)) == math.round(1000 * caLen) then
+--- gets the angle of vertex B when provided three line lengths composing a triangle.
+function GeometryUtil.getAngleABThroughLawOfCos(aLength: number, bLength: number, cLength: number): Radian
+	if aLength + bLength < cLength then
+		return math.rad(180)
+	end
+	if aLength > bLength + cLength then
+		cLength = aLength - bLength
+	end
+	if bLength > aLength + cLength then
+		cLength = bLength - aLength
+	end
+	if cLength == 0 then
 		return 0
 	end
-	-- print("A", a, "B", b, "C", c)
-	local numerator = (abLen ^ 2) + (bcLen ^ 2) - (caLen ^ 2)
-	local denominator = (2 * abLen * bcLen)
-	local frac = numerator / denominator
-	local angle = math.acos(frac)
-
+	local numerator = (aLength^2) + (bLength^2) - (cLength^2)
+	local denominator = (2*aLength*bLength)
+	local angle = math.acos(numerator / denominator)
 	return angle
 end
 
 --- Converts each line into a normal then finds the angle of both normals when they're set to the same origin.
-function Geometry.getAngleBetweenTwoLines(line1: Line, line2: Line): Radian
-	local corner = Geometry.getSharedVertex(line1, line2)
+function GeometryUtil.getAngleBetweenTwoLines(line1: Line, line2: Line): Radian
+	local corner = GeometryUtil.getSharedVertex(line1, line2)
+	assert(corner)
 	local line3 = {
 		if line1[1] == corner then line1[2] else line1[1],
 		if line2[1] == corner then line2[2] else line2[1],
 	}
-	return Geometry.getAngleThroughLawOfCos(line1, line2, line3)
+	return GeometryUtil.getAngleABThroughLawOfCos(
+		GeometryUtil.getLineLength(line1), 
+		GeometryUtil.getLineLength(line2), 
+		GeometryUtil.getLineLength(line3)
+	)
 end
 
---- Gets the side length CA using an the angle of vertex B
-function Geometry.getSideLengthThroughLawOfCos(b: Radian, ab: Line, bc: Line): number
-	local abLen: number = Geometry.getLineLength(ab)
-	local bcLen: number = Geometry.getLineLength(bc)
-	return math.sqrt((abLen ^ 2) + (bcLen ^ 2) - (2 * abLen * bcLen * math.cos(b)))
+--- Gets the side length C using an the angle of vertex B
+function GeometryUtil.getSideLengthThroughLawOfCos(ab: Radian, a: number, b: number): number
+	return math.sqrt((a ^ 2) + (b ^ 2) - (2 * a * b * math.cos(ab)))
 end
+
+--- Converts each line into a normal then finds the angle of both normals when they're set to the same origin.
+function GeometryUtil.getAngleBetweenTwoNormals(a: Normal, b: Normal): Radian
+	return GeometryUtil.getAngleBetweenTwoLines(
+		{Vector3.zero, a},
+		{Vector3.zero, b}
+	)
+end
+
 
 --- Finds a normal perpindicular to the line that faces inwards and is parallel to the surface.
-function Geometry.getLineInwardNormal(
+function GeometryUtil.getLineInwardNormal(
 	line: Line,
 	centerPoint: Vector3
 ): Normal --does not just aim towards center point, only works on concave shapes
-	local lineCenter: Point = Geometry.getLineCenter(line)
+	local lineCenter: Point = GeometryUtil.getLineCenter(line)
 	local lV: Normal = (line[2] - line[1]).Unit
 	local normalToCenter: Normal = (lineCenter - centerPoint).Unit
 	local uV: Normal = lV:Cross(normalToCenter)
@@ -421,7 +436,7 @@ function Geometry.getLineInwardNormal(
 end
 
 --- Finds point in list closest to provided point.
-function Geometry.getClosestPointInList(point: Point, list: { [number]: Point }): Point
+function GeometryUtil.getClosestPointInList(point: Point, list: { [number]: Point }): Point
 	local closestPoint
 	local closestDist = math.huge
 	for i, v3 in ipairs(list) do
@@ -435,7 +450,7 @@ function Geometry.getClosestPointInList(point: Point, list: { [number]: Point })
 end
 
 --- Finds point in list farthest to provided point
-function Geometry.getFarthestPointInList(point: Point, list: { [number]: Point }): Point
+function GeometryUtil.getFarthestPointInList(point: Point, list: { [number]: Point }): Point
 	local farthestPoint
 	local farthestDist = 0
 	for i, v3 in ipairs(list) do
@@ -449,11 +464,15 @@ function Geometry.getFarthestPointInList(point: Point, list: { [number]: Point }
 end
 
 --- Finds the closest point on the line to the provided point.
-function Geometry.getClosestPointOnLine(point: Point, line: Line): Point
+function GeometryUtil.getClosestPointOnLine(point: Point, line: Line): Point
 	local start: Vertex = line[1]
 	local fin: Vertex = line[2]
 
-	local angleS: Radian = Geometry.getAngleThroughLawOfCos({ point, start }, line, { point, fin })
+	local angleS: Radian = GeometryUtil.getAngleABThroughLawOfCos(
+		GeometryUtil.getLineLength({ point, start }), 
+		GeometryUtil.getLineLength(line), 
+		GeometryUtil.getLineLength({ point, fin })
+	)
 
 	local adjDist: number = math.min(math.cos(angleS) * (point - start).Magnitude, (start - fin).Magnitude)
 
@@ -476,11 +495,11 @@ function Geometry.getClosestPointOnLine(point: Point, line: Line): Point
 end
 
 --- Finds the line that comes closest to the point. Chooses arbitrarily when lines are equidistant.
-function Geometry.getLineClosestToPoint(point: Point, lines: { [any]: Line }): Line
+function GeometryUtil.getLineClosestToPoint(point: Point, lines: { [any]: Line }): Line
 	local closestLine
 	local closestDist = math.huge
 	for k, line in pairs(lines) do
-		local closestPoint = Geometry.getClosestPointOnLine(point, line)
+		local closestPoint = GeometryUtil.getClosestPointOnLine(point, line)
 		local dist = (closestPoint - point).Magnitude
 		if closestDist > dist then
 			closestDist = dist
@@ -491,20 +510,20 @@ function Geometry.getLineClosestToPoint(point: Point, lines: { [any]: Line }): L
 end
 
 --- Gets a point at the center of a quadrangular or triangular surface when provides its lines.
-function Geometry.getCenterFromLines(lines: { [any]: Line }): Point?
-	local diagonals: { [number]: Line } = Geometry.getDiagonalLinesFromEdges(lines)
+function GeometryUtil.getCenterFromLines(lines: { [any]: Line }): Point?
+	local diagonals: { [number]: Line } = GeometryUtil.getDiagonalLinesFromEdges(lines)
 	local result: Point?
 	if #lines == 4 then
-		result = Geometry.getLineCenter(diagonals[1])
+		result = GeometryUtil.getLineCenter(diagonals[1])
 	elseif #lines == 3 then
-		local vertices = Geometry.getAllVerticesFromLines(lines)
-		local corners = Geometry.getRightAngleVertices(lines)
+		local vertices = GeometryUtil.getAllVerticesFromLines(lines)
+		local corners = GeometryUtil.getRightAngleVertices(lines)
 		if #corners == 1 then
 			local diagonal1: Line = diagonals[1]
 			local diagonal2: Line = diagonals[2]
 			assert(diagonal1 ~= nil, "Bad diagonal 1")
 			assert(diagonal2 ~= nil, "Bad diagonal 2")
-			result = Geometry.getIntersectionBetweenTwoLines(diagonal1, diagonal2)
+			result = GeometryUtil.getIntersectionBetweenTwoLines(diagonal1, diagonal2)
 		else
 			local a = vertices[1]
 			local b = vertices[3]
@@ -517,20 +536,20 @@ function Geometry.getCenterFromLines(lines: { [any]: Line }): Point?
 end
 
 --- Returns a cframe with the YVec parallel to the surface and the XVec perpindicular to the longest line.
-function Geometry.getSurfaceCFrameFromLines(lines: { [any]: Line }, normal: Normal): CFrame
+function GeometryUtil.getSurfaceCFrameFromLines(lines: { [any]: Line }, normal: Normal): CFrame
 	local longestLine: Line = nil
 	local longestLength: number = 0
 	for i, line in pairs(lines) do
-		local length = Geometry.getLineLength(line)
+		local length = GeometryUtil.getLineLength(line)
 		if longestLength < length then
 			longestLength = length
 			longestLine = line
 		end
 	end
 
-	local centerPoint: Point? = Geometry.getCenterFromLines(lines)
+	local centerPoint: Point? = GeometryUtil.getCenterFromLines(lines)
 	assert(centerPoint ~= nil, "Bad center point")
-	local lineInwardNormal: Normal = Geometry.getLineInwardNormal(longestLine, centerPoint)
+	local lineInwardNormal: Normal = GeometryUtil.getLineInwardNormal(longestLine, centerPoint)
 
 	local zVec: Normal = -lineInwardNormal
 	local yVec: Normal = normal
@@ -540,7 +559,7 @@ function Geometry.getSurfaceCFrameFromLines(lines: { [any]: Line }, normal: Norm
 end
 
 --- Finds the min and max points on a rotated box. Min / Max status are found in object space, not global space.
-function Geometry.getBoxBoundaries(cf: CFrame, size: Vector3): (Point, Point)
+function GeometryUtil.getBoxBoundaries(cf: CFrame, size: Vector3): (Point, Point)
 	local half = size * 0.5
 	local min: Point = (cf * CFrame.new(-half.X, -half.Y, -half.Z)).Position
 	local max: Point = (cf * CFrame.new(half.X, half.Y, half.Z)).Position
@@ -548,7 +567,7 @@ function Geometry.getBoxBoundaries(cf: CFrame, size: Vector3): (Point, Point)
 end
 
 --- Finds intersection point and distance on a plane where normal hits plane from origin. If parallel it returns the origin the normal solves from.
-function Geometry.getPlaneIntersection(
+function GeometryUtil.getPlaneIntersection(
 	origin: Point,
 	normal: Normal,
 	planeOrigin: Point,
@@ -566,7 +585,7 @@ function Geometry.getPlaneIntersection(
 end
 
 --- Finds a normal that's not perpindicular to provided normal. I don't remember why I would ever need to do this, but I'm too afraid to remove it.
-function Geometry.getNonPerpindicularNormal(normal: Normal): Normal
+function GeometryUtil.getNonPerpindicularNormal(normal: Normal): Normal
 	local result = normal:Cross(Vector3.new(0, 1, 0))
 	if math.abs(result:Dot(normal)) == 1 then
 		result = normal:Cross(Vector3.new(1, 0, 0))
@@ -574,13 +593,23 @@ function Geometry.getNonPerpindicularNormal(normal: Normal): Normal
 	return result
 end
 
---- When provided vertex A, vertex B, and line AC it solves for angle C
-function Geometry.getSideLengthThroughLawOfSin(a: Radian, b: Radian, ac: Line): number
-	return (ac[2] - ac[1]).Magnitude * math.sin(a) / math.sin(b)
+--- When provided vertex CA, vertex BC, and the length of side A, it returns the length of side B
+function GeometryUtil.getSideLengthBThroughLawOfSin(ca: Radian, bc: Radian, a: number): number
+	return a * math.sin(ca) / math.sin(bc)
+end
+
+--- When provided vertex CA and side lengths A and B it returns the angle of BC
+function GeometryUtil.getAngleBCThroughLawOfSin(a: number, b: number, ca: Radian): number
+	return math.asin(math.sin(ca)*a/b)
+end
+
+--- When provided vertex BC and side lengths A and B it returns the angle of BC
+function GeometryUtil.getAngleCAThroughLawOfSin(a: number, b: number, bc: Radian): number
+	return math.asin(math.sin(bc)*b/a)
 end
 
 --- Finds closest point on line a to the closest point on line b
-function Geometry.getClosestPointToLineOnLine(a: Line, b: Line): Point?
+function GeometryUtil.getClosestPointToLineOnLine(a: Line, b: Line): Point?
 	local ori = a[1]
 	local dir = a[2] - a[1]
 	local norm = dir.Unit
@@ -595,20 +624,20 @@ function Geometry.getClosestPointToLineOnLine(a: Line, b: Line): Point?
 	end
 
 	local connectionLine = { ori, oppOri }
-	local angle1 = Geometry.getAngleBetweenTwoLines(connectionLine, a)
-	local angle2 = Geometry.getAngleBetweenTwoLines(connectionLine, b)
+	local angle1 = GeometryUtil.getAngleBetweenTwoLines(connectionLine, a)
+	local angle2 = GeometryUtil.getAngleBetweenTwoLines(connectionLine, b)
 	local oppAngle = angle2
 	local adjAngle = math.rad(180) - angle2 - angle1
-	local sideLen = Geometry.getSideLengthThroughLawOfSin(oppAngle, adjAngle, connectionLine)
+	local sideLen = GeometryUtil.getSideLengthBThroughLawOfSin(oppAngle, adjAngle, GeometryUtil.getLineLength(connectionLine))
 	return ori + norm * math.clamp(sideLen, 0, dir.Magnitude)
 end
 
 --- Gets the volume of a box with the provided dimensions.
-function Geometry.getVolume(size: Vector3): number
+function GeometryUtil.getVolume(size: Vector3): number
 	return size.X * size.Y * size.Z
 end
 --- Creates a list of triangles out of a sequential list of Vector2 or 3s, including support for a list of holes created with similar vertex sequences.
-function Geometry.triangulate2D(vertices: PerimeterSequence<Vector2>, holes: {[number]: PerimeterSequence<Vector2>}?): {[number]: PerimeterSequence<Vector2>}
+function GeometryUtil.triangulate2D(vertices: PerimeterSequence<Vector2>, holes: {[number]: PerimeterSequence<Vector2>}?): {[number]: PerimeterSequence<Vector2>}
 	local triangles: {[number]: PerimeterSequence<Vector2>} = {}
 	holes = holes or {}
 	assert(holes ~= nil)
@@ -683,7 +712,7 @@ function Geometry.triangulate2D(vertices: PerimeterSequence<Vector2>, holes: {[n
 end
 
 --- Flattens a list of Vector3s into Vector2s using the zAxis
-function Geometry.flattenPerimeterSequence(sequence: PerimeterSequence<Vector3>, origin: CFrame): (PerimeterSequence<Vector2>, {[Vector2]: Vector3})
+function GeometryUtil.flattenPerimeterSequence(sequence: PerimeterSequence<Vector3>, origin: CFrame): (PerimeterSequence<Vector2>, {[Vector2]: Vector3})
 	local base:  CFrame = origin:Inverse()
 
 	local finalVertices: {[number]: Vector2} = {}
@@ -697,24 +726,24 @@ function Geometry.flattenPerimeterSequence(sequence: PerimeterSequence<Vector3>,
 end
 
 --- Triangulates a list of 3d sequential points similar to triangulate2D.
-function Geometry.triangulate3D<V>(origin: CFrame, perimeter: PerimeterSequence<Vector3>, holes: {[number]: PerimeterSequence<Vector3>}?): {[number]: PerimeterSequence<Vector3>}
+function GeometryUtil.triangulate3D<V>(origin: CFrame, perimeter: PerimeterSequence<Vector3>, holes: {[number]: PerimeterSequence<Vector3>}?): {[number]: PerimeterSequence<Vector3>}
 	local holeV2Sequences = {}
 	local reference = {}
 	for i, holeSeq in ipairs(holes or {}) do
 		local holeReference
-		holeV2Sequences[i], holeReference = Geometry.flattenPerimeterSequence(holeSeq, origin)
-		for i, vec: Vector2 in ipairs(holeV2Sequences[i]) do
+		holeV2Sequences[i], holeReference = GeometryUtil.flattenPerimeterSequence(holeSeq, origin)
+		for j, vec: Vector2 in ipairs(holeV2Sequences[i]) do
 			reference[vec.X] = reference[vec.X] or {}
 			reference[vec.X][vec.Y] = holeReference[vec]
 		end
 	end
-	local perimeterV2, perimeterReference = Geometry.flattenPerimeterSequence(perimeter, origin)
+	local perimeterV2, perimeterReference = GeometryUtil.flattenPerimeterSequence(perimeter, origin)
 	for i, vec: Vector2 in ipairs(perimeterV2) do
 		reference[vec.X] = reference[vec.X] or {}
 		reference[vec.X][vec.Y] = perimeterReference[vec]
 	end
 
-	local triangles2D = Geometry.triangulate2D(perimeterV2, holeV2Sequences)
+	local triangles2D = GeometryUtil.triangulate2D(perimeterV2, holeV2Sequences)
 	local triangles3D: {[number]: PerimeterSequence<Vector3>} = {}
 	for i, triangle2D: {[number]: Vector2} in ipairs(triangles2D) do
 		local triangle3D: {[number]: Vector3} = {}
@@ -727,49 +756,49 @@ function Geometry.triangulate3D<V>(origin: CFrame, perimeter: PerimeterSequence<
 end
 
 --- Gets the angle at the radius that expands to a full side. A hexagon would return 60 degres (in radians).
-function Geometry.getRegularPolygonInnerAngle(sides: number): Radian
+function GeometryUtil.getRegularPolygonInnerAngle(sides: number): Radian
 	assert(sides > 2, "You can't have a 2-sided polygon") --fought urge to include "idiot" in this, as I'm sure I will do this at some point.
 	return math.rad(360)/sides
 end
 
 --- Gets the angle at the vertex. A hexagon would return 120 degres (in radians).
-function Geometry.getRegularPolygonVertexAngle(sides: number): Radian
+function GeometryUtil.getRegularPolygonVertexAngle(sides: number): Radian
 	assert(sides > 2, "You can't have a 2-sided polygon")
-	local innerAngle = Geometry.getRegularPolygonInnerAngle(sides)
+	local innerAngle = GeometryUtil.getRegularPolygonInnerAngle(sides)
 	return 2*(math.rad(180) - (innerAngle/2))
 end
 
 --- Gets the distance from the center to the center of an edge.
-function Geometry.getRegularPolygonEdgeCenterDistance(sides: number, radius: number): number
+function GeometryUtil.getRegularPolygonEdgeCenterDistance(sides: number, radius: number): number
 	assert(radius > 0, "Radius needs to be larger than 0")
 	assert(sides > 2, "You can't have a 2-sided polygon")
-	local innerAngle = Geometry.getRegularPolygonInnerAngle(sides)
+	local innerAngle = GeometryUtil.getRegularPolygonInnerAngle(sides)
 	local hyp = radius
 	return math.cos(innerAngle/2)*hyp
 end
 
 --- Gets the distance from the center to the center of an edge.
-function Geometry.getRegularPolygonSideLength(sides: number, radius: number): number
+function GeometryUtil.getRegularPolygonSideLength(sides: number, radius: number): number
 	assert(radius > 0, "Radius needs to be larger than 0")
 	assert(sides > 2, "You can't have a 2-sided polygon")
-	local innerAngle = Geometry.getRegularPolygonInnerAngle(sides)
+	local innerAngle = GeometryUtil.getRegularPolygonInnerAngle(sides)
 	local hyp = radius
 	return 2*math.sin(innerAngle/2)*hyp
 end
 
 --- Gets the perimeter of the polygon.
-function Geometry.getRegularPolygonPerimeter(sides: number, radius: number): number
+function GeometryUtil.getRegularPolygonPerimeter(sides: number, radius: number): number
 	assert(radius > 0, "Radius needs to be larger than 0")
 	assert(sides > 2, "You can't have a 2-sided polygon")
-	local edgeLength = Geometry.getRegularPolygonSideLength(sides, radius)
+	local edgeLength = GeometryUtil.getRegularPolygonSideLength(sides, radius)
 	return edgeLength * sides
 end
 
 --- Gets the area of the polygon.
-function Geometry.getRegularPolygonArea(sides: number, radius: number): number
-	local edgeLength = Geometry.getRegularPolygonEdgeCenterDistance(sides, radius)
-	local sideLength = Geometry.getRegularPolygonSideLength(sides, radius)
+function GeometryUtil.getRegularPolygonArea(sides: number, radius: number): number
+	local edgeLength = GeometryUtil.getRegularPolygonEdgeCenterDistance(sides, radius)
+	local sideLength = GeometryUtil.getRegularPolygonSideLength(sides, radius)
 	return edgeLength * sideLength * sides
 end
 
-return Geometry
+return GeometryUtil

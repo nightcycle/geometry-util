@@ -125,10 +125,10 @@ function earcut(data, holeIndices, dim)
 			local x = data[i]
 			local y = data[i + 1]
 
-			if x < minX then minX = x end
-			if y < minY then minY = y end
-			if x > maxX then maxX = x end
-			if y > maxY then maxY = y end
+			if x < minX then minX = x; end
+			if y < minY then minY = y; end
+			if x > maxX then maxX = x; end
+			if y > maxY then maxY = y; end
 
 			i = i + dim
 		end
